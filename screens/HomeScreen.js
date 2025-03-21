@@ -25,6 +25,11 @@ const HomeScreen = ({ navigation }) => {
                     title="Create Study Group"
                     onPress={() => navigation.navigate("PostGroup")}
                 />
+                <Button
+                    title="View Study Groups"
+                    onPress={() => navigation.navigate("GroupsList")}
+                />
+
 
             </View>
         </View>
