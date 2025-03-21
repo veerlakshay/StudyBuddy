@@ -21,6 +21,11 @@ const HomeScreen = ({ navigation }) => {
 
             <View style={styles.buttonContainer}>
                 <Button title="Logout" onPress={handleLogout} />
+                <Button
+                    title="Create Study Group"
+                    onPress={() => navigation.navigate("PostGroup")}
+                />
+
             </View>
         </View>
     );
