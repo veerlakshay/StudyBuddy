@@ -9,6 +9,10 @@ import {
     Alert,
     ScrollView
 } from "react-native";
+import { db } from "../config/firebase";
+import { collection, addDoc, Timestamp } from "firebase/firestore";
+import { auth } from "../config/firebase";
+
 
 const PostGroupScreen = ({ navigation }) => {
     const [title, setTitle] = useState("");
@@ -16,21 +20,35 @@ const PostGroupScreen = ({ navigation }) => {
     const [description, setDescription] = useState("");
     const [date, setDate] = useState("");
 
-    const handlePost = () => {
+    const handlePost = async () => {
         if (!title || !subject || !description || !date) {
             Alert.alert("Please fill all fields");
             return;
         }
 
-        // We'll save to Firestore in the next step
-        console.log("Posting group:", { title, subject, description, date });
-        Alert.alert("Success", "Study group posted!");
-        // Reset fields
-        setTitle("");
-        setSubject("");
-        setDescription("");
-        setDate("");
+        try {
+            await addDoc(collection(db, "studyGroups"), {
+                title,
+                subject,
+                description,
+                date,
+                createdAt: Timestamp.now(),
+                createdBy: auth.currentUser?.email,
+            });
+
+            Alert.alert("Success", "Study group posted!");
+            // Clear the form
+            setTitle("");
+            setSubject("");
+            setDescription("");
+            setDate("");
+            navigation.goBack(); // Go back to Home after posting
+        } catch (error) {
+            console.error("Error adding document: ", error);
+            Alert.alert("Error", "Could not post group.");
+        }
     };
+
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
