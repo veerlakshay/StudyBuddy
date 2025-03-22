@@ -1,8 +1,17 @@
 // screens/SignupScreen.js
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
+import {
+    Text,
+    TextInput,
+    TouchableOpacity,
+    StyleSheet,
+    KeyboardAvoidingView,
+    Platform,
+    Alert,
+} from "react-native";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebase";
+import colors from "../theme/colors";
 
 const SignupScreen = ({ navigation }) => {
     const [email, setEmail] = useState("");
@@ -19,60 +28,96 @@ const SignupScreen = ({ navigation }) => {
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Sign Up</Text>
+        <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+        >
+            <Text style={styles.title}>Create Account</Text>
 
             <TextInput
-                style={styles.input}
                 placeholder="Email"
-                autoCapitalize="none"
-                onChangeText={setEmail}
                 value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                style={styles.input}
+                placeholderTextColor={colors.muted}
             />
 
             <TextInput
-                style={styles.input}
                 placeholder="Password"
-                secureTextEntry
-                onChangeText={setPassword}
                 value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                style={styles.input}
+                placeholderTextColor={colors.muted}
             />
 
-            <Button title="Create Account" onPress={handleSignup} />
+            <TouchableOpacity style={styles.button} onPress={handleSignup}>
+                <Text style={styles.buttonText}>Sign Up</Text>
+            </TouchableOpacity>
 
-            <Text
-                style={styles.link}
-                onPress={() => navigation.navigate("Login")}
-            >
-                Already have an account? Login
+            <Text style={styles.linkText}>
+                Already have an account?
+                <Text
+                    style={styles.link}
+                    onPress={() => navigation.navigate("Login")}
+                >
+                    {" "}
+                    Log In
+                </Text>
             </Text>
-        </View>
+        </KeyboardAvoidingView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: colors.background,
         justifyContent: "center",
-        paddingHorizontal: 20,
+        paddingHorizontal: 24,
     },
     title: {
-        fontSize: 28,
+        fontSize: 32,
         fontWeight: "bold",
-        marginBottom: 20,
+        color: colors.primary,
+        marginBottom: 30,
         textAlign: "center",
     },
     input: {
+        backgroundColor: colors.card,
+        borderRadius: 12,
+        padding: 14,
+        fontSize: 16,
+        marginBottom: 16,
         borderWidth: 1,
-        borderColor: "#ccc",
-        borderRadius: 8,
-        padding: 10,
-        marginBottom: 15,
+        borderColor: colors.border,
+        color: colors.text,
+    },
+    button: {
+        backgroundColor: colors.primary,
+        paddingVertical: 14,
+        borderRadius: 12,
+        alignItems: "center",
+        marginTop: 10,
+        shadowColor: colors.primary,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        elevation: 5,
+    },
+    buttonText: {
+        color: "#fff",
+        fontWeight: "600",
+        fontSize: 18,
+    },
+    linkText: {
+        marginTop: 20,
+        textAlign: "center",
+        color: colors.text,
     },
     link: {
-        color: "blue",
-        marginTop: 15,
-        textAlign: "center",
+        color: colors.primary,
+        fontWeight: "bold",
     },
 });
 

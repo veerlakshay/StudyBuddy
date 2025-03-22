@@ -1,8 +1,17 @@
 // screens/LoginScreen.js
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
+import {
+    Text,
+    TextInput,
+    TouchableOpacity,
+    StyleSheet,
+    KeyboardAvoidingView,
+    Platform,
+    Alert,
+} from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebase";
+import colors from "../theme/colors";
 
 const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState("");
@@ -12,68 +21,103 @@ const LoginScreen = ({ navigation }) => {
         try {
             await signInWithEmailAndPassword(auth, email, password);
             Alert.alert("Success", "Logged in successfully!");
-            navigation.replace("Home"); // 👈 Navigate to Home
-
+            navigation.replace("Home");
         } catch (error) {
             Alert.alert("Login Error", error.message);
         }
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Login</Text>
+        <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+        >
+            <Text style={styles.title}>Welcome Back 👋</Text>
 
             <TextInput
-                style={styles.input}
                 placeholder="Email"
-                autoCapitalize="none"
-                onChangeText={setEmail}
                 value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                style={styles.input}
+                placeholderTextColor={colors.muted}
             />
 
             <TextInput
-                style={styles.input}
                 placeholder="Password"
-                secureTextEntry
-                onChangeText={setPassword}
                 value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                style={styles.input}
+                placeholderTextColor={colors.muted}
             />
 
-            <Button title="Login" onPress={handleLogin} />
+            <TouchableOpacity style={styles.button} onPress={handleLogin}>
+                <Text style={styles.buttonText}>Log In</Text>
+            </TouchableOpacity>
 
-            <Text
-                style={styles.link}
-                onPress={() => navigation.navigate("Signup")}
-            >
-                Don’t have an account? Sign up
+            <Text style={styles.linkText}>
+                Don’t have an account?
+                <Text
+                    style={styles.link}
+                    onPress={() => navigation.navigate("Signup")}
+                >
+                    {" "}
+                    Sign Up
+                </Text>
             </Text>
-        </View>
+        </KeyboardAvoidingView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: colors.background,
         justifyContent: "center",
-        paddingHorizontal: 20,
+        paddingHorizontal: 24,
     },
     title: {
-        fontSize: 28,
+        fontSize: 32,
         fontWeight: "bold",
-        marginBottom: 20,
+        color: colors.primary,
+        marginBottom: 30,
         textAlign: "center",
     },
     input: {
+        backgroundColor: colors.card,
+        borderRadius: 12,
+        padding: 14,
+        fontSize: 16,
+        marginBottom: 16,
         borderWidth: 1,
-        borderColor: "#ccc",
-        borderRadius: 8,
-        padding: 10,
-        marginBottom: 15,
+        borderColor: colors.border,
+        color: colors.text,
+    },
+    button: {
+        backgroundColor: colors.primary,
+        paddingVertical: 14,
+        borderRadius: 12,
+        alignItems: "center",
+        marginTop: 10,
+        shadowColor: colors.primary,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        elevation: 5,
+    },
+    buttonText: {
+        color: "#fff",
+        fontWeight: "600",
+        fontSize: 18,
+    },
+    linkText: {
+        marginTop: 20,
+        textAlign: "center",
+        color: colors.text,
     },
     link: {
-        color: "blue",
-        marginTop: 15,
-        textAlign: "center",
+        color: colors.primary,
+        fontWeight: "bold",
     },
 });
 

@@ -1,12 +1,16 @@
 // screens/GroupsListScreen.js
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, ActivityIndicator } from "react-native";
-import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
-import { db } from "../config/firebase";
-import { auth } from "../config/firebase";
-import { doc, setDoc } from "firebase/firestore";
-import { TouchableOpacity } from "react-native";
-
+import {
+    View,
+    Text,
+    FlatList,
+    StyleSheet,
+    ActivityIndicator,
+    TouchableOpacity,
+} from "react-native";
+import { collection, onSnapshot, query, orderBy, doc, setDoc } from "firebase/firestore";
+import { auth, db } from "../config/firebase";
+import colors from "../theme/colors";
 
 const GroupsListScreen = () => {
     const [groups, setGroups] = useState([]);
@@ -25,43 +29,41 @@ const GroupsListScreen = () => {
             setLoading(false);
         });
 
-        return () => unsubscribe(); // Unsubscribe when component unmounts
+        return () => unsubscribe();
     }, []);
 
     const handleJoinGroup = async (group) => {
         try {
             const userId = auth.currentUser.uid;
-            const joinedGroupRef = doc(db, "users", userId, "joinedGroups", group.id);
-
-            await setDoc(joinedGroupRef, group);
-            alert("You joined this group!");
+            const joinedRef = doc(db, "users", userId, "joinedGroups", group.id);
+            await setDoc(joinedRef, group);
+            alert("🎉 You joined this group!");
         } catch (error) {
-            alert("Error joining group: " + error.message);
+            alert("❌ Error: " + error.message);
         }
     };
 
     const renderItem = ({ item }) => (
         <View style={styles.card}>
             <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.subject}>Subject: {item.subject}</Text>
+            <Text style={styles.subject}>📚 {item.subject}</Text>
             <Text style={styles.description}>{item.description}</Text>
-            <Text style={styles.date}>📅 {item.date}</Text>
+            <Text style={styles.date}>🗓 {item.date}</Text>
             <Text style={styles.creator}>Posted by: {item.createdBy}</Text>
 
             <TouchableOpacity
                 style={styles.joinButton}
                 onPress={() => handleJoinGroup(item)}
             >
-                <Text style={styles.joinButtonText}>Join Group</Text>
+                <Text style={styles.joinText}>Join Group</Text>
             </TouchableOpacity>
         </View>
     );
 
-
     if (loading) {
         return (
             <View style={styles.loading}>
-                <ActivityIndicator size="large" color="#000" />
+                <ActivityIndicator size="large" color={colors.primary} />
             </View>
         );
     }
@@ -78,52 +80,56 @@ const GroupsListScreen = () => {
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: "#fff",
-        borderRadius: 8,
-        padding: 15,
-        marginBottom: 12,
+        backgroundColor: colors.card,
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 16,
         shadowColor: "#000",
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 2,
     },
     title: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: "bold",
+        color: colors.primary,
+        marginBottom: 4,
     },
     subject: {
         fontSize: 16,
-        marginTop: 5,
+        color: colors.text,
+        marginBottom: 6,
     },
     description: {
         fontSize: 14,
-        marginTop: 8,
+        color: colors.text,
+        marginBottom: 6,
     },
     date: {
-        marginTop: 10,
-        color: "gray",
+        fontSize: 13,
+        color: colors.muted,
+        marginBottom: 4,
     },
     creator: {
-        marginTop: 4,
         fontSize: 12,
-        color: "gray",
+        color: colors.muted,
+        marginBottom: 12,
+    },
+    joinButton: {
+        backgroundColor: colors.primary,
+        paddingVertical: 10,
+        borderRadius: 8,
+        alignItems: "center",
+    },
+    joinText: {
+        color: "#fff",
+        fontWeight: "bold",
+        fontSize: 16,
     },
     loading: {
         flex: 1,
         justifyContent: "center",
     },
-    joinButton: {
-        marginTop: 10,
-        paddingVertical: 10,
-        backgroundColor: "#1e90ff",
-        borderRadius: 6,
-        alignItems: "center",
-    },
-    joinButtonText: {
-        color: "#fff",
-        fontWeight: "bold",
-    }
-
 });
 
 export default GroupsListScreen;

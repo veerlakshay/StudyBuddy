@@ -1,18 +1,18 @@
 // screens/PostGroupScreen.js
 import React, { useState } from "react";
 import {
-    View,
     Text,
     TextInput,
-    Button,
+    TouchableOpacity,
     StyleSheet,
+    ScrollView,
     Alert,
-    ScrollView
+    KeyboardAvoidingView,
+    Platform,
 } from "react-native";
-import { db } from "../config/firebase";
+import { db, auth } from "../config/firebase";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
-import { auth } from "../config/firebase";
-
+import colors from "../theme/colors";
 
 const PostGroupScreen = ({ navigation }) => {
     const [title, setTitle] = useState("");
@@ -22,7 +22,7 @@ const PostGroupScreen = ({ navigation }) => {
 
     const handlePost = async () => {
         if (!title || !subject || !description || !date) {
-            Alert.alert("Please fill all fields");
+            Alert.alert("All fields are required.");
             return;
         }
 
@@ -37,75 +37,103 @@ const PostGroupScreen = ({ navigation }) => {
             });
 
             Alert.alert("Success", "Study group posted!");
-            // Clear the form
             setTitle("");
             setSubject("");
             setDescription("");
             setDate("");
-            navigation.goBack(); // Go back to Home after posting
+            navigation.goBack();
         } catch (error) {
-            console.error("Error adding document: ", error);
-            Alert.alert("Error", "Could not post group.");
+            Alert.alert("Error", "Something went wrong.");
         }
     };
 
-
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.title}>Create Study Group</Text>
+        <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            style={{ flex: 1 }}
+        >
+            <ScrollView contentContainerStyle={styles.container}>
+                <Text style={styles.header}>📌 Create a Study Group</Text>
 
-            <TextInput
-                style={styles.input}
-                placeholder="Group Title"
-                value={title}
-                onChangeText={setTitle}
-            />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Group Title"
+                    value={title}
+                    onChangeText={setTitle}
+                    placeholderTextColor={colors.muted}
+                />
 
-            <TextInput
-                style={styles.input}
-                placeholder="Subject"
-                value={subject}
-                onChangeText={setSubject}
-            />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Subject"
+                    value={subject}
+                    onChangeText={setSubject}
+                    placeholderTextColor={colors.muted}
+                />
 
-            <TextInput
-                style={styles.input}
-                placeholder="Description"
-                value={description}
-                multiline
-                numberOfLines={4}
-                onChangeText={setDescription}
-            />
+                <TextInput
+                    style={[styles.input, { height: 100 }]}
+                    placeholder="Description"
+                    value={description}
+                    onChangeText={setDescription}
+                    multiline
+                    placeholderTextColor={colors.muted}
+                />
 
-            <TextInput
-                style={styles.input}
-                placeholder="Date (e.g. Mar 25, 5:00 PM)"
-                value={date}
-                onChangeText={setDate}
-            />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Date & Time (e.g. Mar 28, 5PM)"
+                    value={date}
+                    onChangeText={setDate}
+                    placeholderTextColor={colors.muted}
+                />
 
-            <Button title="Post Study Group" onPress={handlePost} />
-        </ScrollView>
+                <TouchableOpacity style={styles.button} onPress={handlePost}>
+                    <Text style={styles.buttonText}>📤 Post Group</Text>
+                </TouchableOpacity>
+            </ScrollView>
+        </KeyboardAvoidingView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        padding: 20,
+        backgroundColor: colors.background,
+        padding: 24,
         paddingBottom: 40,
     },
-    title: {
-        fontSize: 24,
+    header: {
+        fontSize: 26,
         fontWeight: "bold",
-        marginBottom: 20,
+        color: colors.primary,
         textAlign: "center",
+        marginBottom: 30,
     },
     input: {
+        backgroundColor: colors.card,
+        borderRadius: 12,
+        padding: 14,
+        fontSize: 16,
+        marginBottom: 16,
         borderWidth: 1,
-        borderColor: "#ccc",
-        padding: 12,
-        borderRadius: 8,
-        marginBottom: 15,
+        borderColor: colors.border,
+        color: colors.text,
+    },
+    button: {
+        backgroundColor: colors.primary,
+        paddingVertical: 14,
+        borderRadius: 12,
+        alignItems: "center",
+        marginTop: 10,
+        shadowColor: colors.primary,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        elevation: 5,
+    },
+    buttonText: {
+        color: "#fff",
+        fontWeight: "600",
+        fontSize: 18,
     },
 });
 
