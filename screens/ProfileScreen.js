@@ -1,44 +1,28 @@
-// screens/GroupsListScreen.js
+// screens/ProfileScreen.js
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, StyleSheet, ActivityIndicator } from "react-native";
-import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
-import { db } from "../config/firebase";
-import { auth } from "../config/firebase";
-import { doc, setDoc } from "firebase/firestore";
-import { TouchableOpacity } from "react-native";
+import { auth, db } from "../config/firebase";
+import { collection, onSnapshot } from "firebase/firestore";
 
-
-const GroupsListScreen = () => {
-    const [groups, setGroups] = useState([]);
+const ProfileScreen = () => {
+    const [joinedGroups, setJoinedGroups] = useState([]);
     const [loading, setLoading] = useState(true);
+    const userId = auth.currentUser?.uid;
 
     useEffect(() => {
-        const groupsRef = collection(db, "studyGroups");
-        const q = query(groupsRef, orderBy("createdAt", "desc"));
+        const joinedRef = collection(db, "users", userId, "joinedGroups");
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const groupList = snapshot.docs.map((doc) => ({
+        const unsubscribe = onSnapshot(joinedRef, (snapshot) => {
+            const groups = snapshot.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data(),
             }));
-            setGroups(groupList);
+            setJoinedGroups(groups);
             setLoading(false);
         });
 
-        return () => unsubscribe(); // Unsubscribe when component unmounts
+        return () => unsubscribe();
     }, []);
-
-    const handleJoinGroup = async (group) => {
-        try {
-            const userId = auth.currentUser.uid;
-            const joinedGroupRef = doc(db, "users", userId, "joinedGroups", group.id);
-
-            await setDoc(joinedGroupRef, group);
-            alert("You joined this group!");
-        } catch (error) {
-            alert("Error joining group: " + error.message);
-        }
-    };
 
     const renderItem = ({ item }) => (
         <View style={styles.card}>
@@ -47,16 +31,8 @@ const GroupsListScreen = () => {
             <Text style={styles.description}>{item.description}</Text>
             <Text style={styles.date}>📅 {item.date}</Text>
             <Text style={styles.creator}>Posted by: {item.createdBy}</Text>
-
-            <TouchableOpacity
-                style={styles.joinButton}
-                onPress={() => handleJoinGroup(item)}
-            >
-                <Text style={styles.joinButtonText}>Join Group</Text>
-            </TouchableOpacity>
         </View>
     );
-
 
     if (loading) {
         return (
@@ -68,10 +44,11 @@ const GroupsListScreen = () => {
 
     return (
         <FlatList
-            data={groups}
+            data={joinedGroups}
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
             contentContainerStyle={{ padding: 16 }}
+            ListEmptyComponent={<Text style={{ textAlign: "center", marginTop: 20 }}>No groups joined yet.</Text>}
         />
     );
 };
@@ -112,18 +89,6 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
     },
-    joinButton: {
-        marginTop: 10,
-        paddingVertical: 10,
-        backgroundColor: "#1e90ff",
-        borderRadius: 6,
-        alignItems: "center",
-    },
-    joinButtonText: {
-        color: "#fff",
-        fontWeight: "bold",
-    }
-
 });
 
-export default GroupsListScreen;
+export default ProfileScreen;

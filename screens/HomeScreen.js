@@ -29,6 +29,10 @@ const HomeScreen = ({ navigation }) => {
                     title="View Study Groups"
                     onPress={() => navigation.navigate("GroupsList")}
                 />
+                <Button
+                    title="My Joined Groups"
+                    onPress={() => navigation.navigate("Profile")}
+                />
 
 
             </View>
