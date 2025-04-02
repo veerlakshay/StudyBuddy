@@ -8,9 +8,10 @@ import {
     ActivityIndicator,
     TouchableOpacity,
     RefreshControl,
+    Alert,
 } from "react-native";
 import { auth, db } from "../config/firebase";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, doc, deleteDoc } from "firebase/firestore";
 import colors from "../theme/colors";
 import { isGroupExpired } from "../utils/groupCleanup";
 import { Ionicons } from "@expo/vector-icons";
@@ -23,9 +24,10 @@ const ProfileScreen = ({ navigation }) => {
     const userId = auth.currentUser?.uid;
 
     const fetchJoinedGroups = () => {
-        const joinedRef = collection(db, "users", userId, "joinedGroups");
+        setLoading(true);
+        const joinedGroupsRef = collection(db, "users", userId, "joinedGroups");
 
-        const unsubscribe = onSnapshot(joinedRef, (snapshot) => {
+        const unsubscribe = onSnapshot(joinedGroupsRef, (snapshot) => {
             const groups = snapshot.docs
                 .map((doc) => ({
                     id: doc.id,
@@ -59,6 +61,32 @@ const ProfileScreen = ({ navigation }) => {
         }
     };
 
+    const handleLeaveGroup = async (group) => {
+        Alert.alert(
+            "Leave Group",
+            "Are you sure you want to leave this study group?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel",
+                },
+                {
+                    text: "Leave",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            const userId = auth.currentUser.uid;
+                            await deleteDoc(doc(db, "users", userId, "joinedGroups", group.id));
+                            Alert.alert("Success", "You've left the group");
+                        } catch (error) {
+                            Alert.alert("Error", "Failed to leave group");
+                        }
+                    },
+                },
+            ]
+        );
+    };
+
     const renderItem = ({ item }) => (
         <View style={styles.card}>
             <View style={styles.cardHeader}>
@@ -66,6 +94,12 @@ const ProfileScreen = ({ navigation }) => {
                     <Ionicons name="school-outline" size={24} color={colors.primary} />
                     <Text style={styles.title}>{item.title}</Text>
                 </View>
+                <TouchableOpacity
+                    style={styles.leaveButton}
+                    onPress={() => handleLeaveGroup(item)}
+                >
+                    <Ionicons name="exit-outline" size={20} color={colors.danger} />
+                </TouchableOpacity>
             </View>
 
             <View style={styles.subjectContainer}>
@@ -108,6 +142,12 @@ const ProfileScreen = ({ navigation }) => {
                     onPress={handleLogout}
                 >
                     <Ionicons name="log-out-outline" size={24} color={colors.danger} />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    style={styles.editButton}
+                    onPress={() => navigation.navigate('UserProfile')}
+                >
+                    <Ionicons name="pencil" size={24} color={colors.primary} />
                 </TouchableOpacity>
             </View>
 
@@ -165,6 +205,9 @@ const styles = StyleSheet.create({
         color: colors.text,
     },
     logoutButton: {
+        padding: 8,
+    },
+    editButton: {
         padding: 8,
     },
     profileSection: {
@@ -259,6 +302,9 @@ const styles = StyleSheet.create({
     creator: {
         fontSize: 12,
         color: colors.muted,
+    },
+    leaveButton: {
+        padding: 8,
     },
     loading: {
         flex: 1,

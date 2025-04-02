@@ -18,14 +18,40 @@ import { db, auth } from "../config/firebase";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
 import colors from "../theme/colors";
 import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { format } from "date-fns";
 
 const PostGroupScreen = ({ navigation }) => {
     const [title, setTitle] = useState("");
     const [subject, setSubject] = useState("");
     const [description, setDescription] = useState("");
-    const [date, setDate] = useState("");
+    const [date, setDate] = useState(new Date());
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [showTimePicker, setShowTimePicker] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const buttonScale = new Animated.Value(1);
+
+    const handleDateChange = (event, selectedDate) => {
+        setShowDatePicker(false);
+        if (selectedDate) {
+            const currentDate = new Date();
+            if (selectedDate < currentDate) {
+                Alert.alert("Invalid Date", "Please select a future date");
+                return;
+            }
+            setDate(selectedDate);
+        }
+    };
+
+    const handleTimeChange = (event, selectedTime) => {
+        setShowTimePicker(false);
+        if (selectedTime) {
+            const newDate = new Date(date);
+            newDate.setHours(selectedTime.getHours());
+            newDate.setMinutes(selectedTime.getMinutes());
+            setDate(newDate);
+        }
+    };
 
     const handlePost = async () => {
         if (!title || !subject || !description || !date) {
@@ -70,8 +96,8 @@ const PostGroupScreen = ({ navigation }) => {
                 title,
                 subject,
                 description,
-                dateString: date,
-                dateTimestamp: Timestamp.fromDate(groupDate),
+                dateString: format(date, "MMM dd, yyyy 'at' hh:mm a"),
+                dateTimestamp: Timestamp.fromDate(date),
                 createdAt: Timestamp.now(),
                 createdBy: auth.currentUser?.email,
             });
@@ -80,7 +106,7 @@ const PostGroupScreen = ({ navigation }) => {
             setTitle("");
             setSubject("");
             setDescription("");
-            setDate("");
+            setDate(new Date());
             navigation.goBack();
         } catch (error) {
             Alert.alert("Error", "Something went wrong.");
@@ -145,16 +171,46 @@ const PostGroupScreen = ({ navigation }) => {
                         />
                     </View>
 
-                    <View style={styles.inputContainer}>
-                        <Ionicons name="calendar-outline" size={20} color={colors.muted} style={styles.inputIcon} />
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Date & Time (e.g. Mar 28, 5PM)"
-                            value={date}
-                            onChangeText={setDate}
-                            placeholderTextColor={colors.muted}
-                        />
+                    <View style={styles.dateTimeContainer}>
+                        <TouchableOpacity 
+                            style={styles.dateTimeButton}
+                            onPress={() => setShowDatePicker(true)}
+                        >
+                            <Ionicons name="calendar-outline" size={20} color={colors.primary} />
+                            <Text style={styles.dateTimeText}>
+                                {format(date, "MMM dd, yyyy")}
+                            </Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity 
+                            style={styles.dateTimeButton}
+                            onPress={() => setShowTimePicker(true)}
+                        >
+                            <Ionicons name="time-outline" size={20} color={colors.primary} />
+                            <Text style={styles.dateTimeText}>
+                                {format(date, "hh:mm a")}
+                            </Text>
+                        </TouchableOpacity>
                     </View>
+
+                    {showDatePicker && (
+                        <DateTimePicker
+                            value={date}
+                            mode="date"
+                            display={Platform.OS === "ios" ? "spinner" : "default"}
+                            onChange={handleDateChange}
+                            minimumDate={new Date()}
+                        />
+                    )}
+
+                    {showTimePicker && (
+                        <DateTimePicker
+                            value={date}
+                            mode="time"
+                            display={Platform.OS === "ios" ? "spinner" : "default"}
+                            onChange={handleTimeChange}
+                        />
+                    )}
 
                     <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
                         <TouchableOpacity 
@@ -240,6 +296,30 @@ const styles = StyleSheet.create({
         height: 100,
         textAlignVertical: 'top',
         paddingTop: 14,
+    },
+    dateTimeContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 24,
+    },
+    dateTimeButton: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: colors.card,
+        borderRadius: 12,
+        padding: 12,
+        marginHorizontal: 4,
+        shadowColor: colors.cardShadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    dateTimeText: {
+        marginLeft: 8,
+        fontSize: 16,
+        color: colors.text,
     },
     button: {
         backgroundColor: colors.primary,
