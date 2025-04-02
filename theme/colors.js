@@ -1,11 +1,17 @@
 // theme/colors.js
 export default {
-    primary: "#4E8DFF",
-    secondary: "#6EE7B7",
-    background: "#F3F4F6",
+    primary: "#6366F1",
+    secondary: "#10B981",
+    background: "#F8FAFC",
     card: "#FFFFFF",
-    text: "#1F2937",
-    muted: "#6B7280",
-    border: "#E5E7EB",
+    text: "#1E293B",
+    muted: "#64748B",
+    border: "#E2E8F0",
     danger: "#EF4444",
+    success: "#22C55E",
+    warning: "#F59E0B",
+    info: "#3B82F6",
+    cardShadow: "rgba(0, 0, 0, 0.05)",
+    primaryLight: "#818CF8",
+    secondaryLight: "#34D399",
 };

@@ -10,14 +10,18 @@ import GroupListScreen from "../screens/GroupListScreen";
 import LoadingScreen from "../screens/LoadingScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 
-
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
     return (
         <NavigationContainer>
-            <Stack.Navigator initialRouteName="Loading">
-                <Stack.Screen name="Loading" component={LoadingScreen} options={{ headerShown: false }} />
+            <Stack.Navigator 
+                initialRouteName="Loading"
+                screenOptions={{
+                    headerShown: false,
+                }}
+            >
+                <Stack.Screen name="Loading" component={LoadingScreen} />
                 <Stack.Screen name="Login" component={LoginScreen} />
                 <Stack.Screen name="Signup" component={SignupScreen} />
                 <Stack.Screen name="Home" component={HomeScreen} />
@@ -25,7 +29,6 @@ const AppNavigator = () => {
                 <Stack.Screen name="GroupsList" component={GroupListScreen} />
                 <Stack.Screen name="Profile" component={ProfileScreen} />
             </Stack.Navigator>
-
         </NavigationContainer>
     );
 };
